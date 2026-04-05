@@ -1,5 +1,6 @@
 # Simple tests for inventory stack behaviour
 # Run these inside Godot's script runner or print outputs to Debug
+extends Node
 
 func _ready():
 	print("Starting inventory tests")
@@ -28,4 +29,5 @@ func _ready():
 	print("Added axe")
 
 	print("Inventory tests done")
-	get_tree().quit()
+	# Tylko dla testów - usunąć w produkcji
+	get_tree().call_deferred("quit")

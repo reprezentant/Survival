@@ -9,7 +9,7 @@ func _init() -> void:
 	layer = 100
 
 
-func setup(item_resource: ItemResource) -> void:
+func setup(item_resource: ItemResource, _will_disappear: bool = false) -> void:
 	# Full-screen root control on this CanvasLayer
 	var root := Control.new()
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -51,7 +51,7 @@ func setup(item_resource: ItemResource) -> void:
 	title_container.add_child(warning_label)
 	
 	var title := Label.new()
-	title.text = "Czy na pewno chcesz usunąć?"
+	title.text = "Czy na pewno chcesz wyrzucić?"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 16)
 	title_container.add_child(title)
@@ -75,9 +75,14 @@ func setup(item_resource: ItemResource) -> void:
 
 	# Warning message
 	var warning_msg := Label.new()
-	warning_msg.text = "Ten przedmiot jest cenny i trudny do odzyskania."
+	if _will_disappear:
+		warning_msg.text = "⚠️ UWAGA: Ten przedmiot zniknie na ZAWSZE! ⚠️"
+		warning_msg.add_theme_color_override("font_color", Color.RED)
+		warning_msg.add_theme_font_size_override("font_size", 16)
+	else:
+		warning_msg.text = "Ten przedmiot jest cenny i może się zgubić."
+		warning_msg.add_theme_color_override("font_color", Color.ORANGE_RED)
 	warning_msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	warning_msg.add_theme_color_override("font_color", Color.ORANGE_RED)
 	vbox.add_child(warning_msg)
 
 	# Buttons
@@ -93,7 +98,7 @@ func setup(item_resource: ItemResource) -> void:
 	hbox.add_child(cancel_btn)
 
 	var drop_btn := Button.new()
-	drop_btn.text = "Usuń"
+	drop_btn.text = "Wyrzuć"
 	drop_btn.custom_minimum_size = Vector2(120, 36)
 	drop_btn.modulate = Color.LIGHT_CORAL
 	drop_btn.pressed.connect(_on_confirm)

@@ -31,6 +31,9 @@ Zbieraj surowce → Craftuj narzędzia → Odkrywaj nowe receptury → Zbuduj tr
 ### Ekwipunek i przedmioty (18 typów)
 - [x] Inwentarz 28 slotów + hotbar 9 slotów
 - [x] Stackowanie (max 50), drag-and-drop między wszystkimi slotami
+- [x] **Dzielenie stosów** — menu kontekstowe PPM do dzielenia stacków
+- [x] **System ostrzeżeń przy wyrzucaniu** — rozróżnienie przedmiotów które znikają na zawsze vs odzyskiwalne
+- [x] **Potwierdzenia wyrzucania** — popup dla cennych przedmiotów z jasną informacją o konsekwencjach
 - [x] Zapis/odczyt inwentarza (`user://inventory.json`)
 - [x] 3 typy zasobów przedmiotów: `ItemResource`, `WeaponItemResource`, `ConsumableItemResource`
 
@@ -52,10 +55,10 @@ Rope (Plant×2)
   └─ Axe (Stick+Stone+Rope)
   └─ Pickaxe (Stick+Stone+Rope)
   └─ Multitool (Stick+Stone+Flintstone+Coal+RawMeat) ──── prerequisyt
-       └─ Tinderbox (Stick×2+Stone+Flintstone+Coal) ──── prerequisyt
-            └─ Campfire (Stick×3+Stone×10)
-            └─ Torch (Stick+Rope×2)
-            └─ Raft (Stick×6+Rope×4+Plant×6+Log×6+CookedMeat×2) ← WIN
+	   └─ Tinderbox (Stick×2+Stone+Flintstone+Coal) ──── prerequisyt
+			└─ Campfire (Stick×3+Stone×10)
+			└─ Torch (Stick+Rope×2)
+			└─ Raft (Stick×6+Rope×4+Plant×6+Log×6+CookedMeat×2) ← WIN
   └─ Tent (Stick×5+Rope×4+Plant×6)
 ```
 
@@ -65,6 +68,9 @@ Rope (Plant×2)
 - [x] **Licznik czasu** — wizualny pasek postępu + countdown timer (mm:ss)
 - [x] **Persistent state** — stan gotowania zachowany po zamknięciu menu
 - [x] **Smart inventory** — gotowe przedmioty przechowywane w slocie
+- [x] **Popup wyboru ilości** — dialog do wybierania ile przedmiotów ugotować
+- [x] **Inteligentne zarządzanie stanem** — brak automatycznego umieszczania przedmiotów
+- [x] **Scena świata dla ugotowanego mięsa** — prawidłowe wyrzucanie na ziemię
 - [x] Receptura: RawMeat → CookedMeat (5 sek każde)
 
 ### Walka i hittable objects

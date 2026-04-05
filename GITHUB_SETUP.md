@@ -46,8 +46,16 @@ git commit -m "🐛 Fix: opis zmian"
 git push
 ```
 
+### Sugerowane komunikaty dla ostatnich zmian:
+```bash
+git add .
+git commit -m "✨ Enhance: Cooking system improvements - quantity selection, state management, cooked meat dropping"
+git push
+```
+
 ## 📊 Statystyki projektu
-- **Commit**: 1x (initial)
+- **Commits**: Multiple (initial + cooking system enhancements)
+- **Features**: Cooking system, inventory management, drop confirmations
 - **Pliki**: ~150+ 
 - **Języki**: GDScript, Markdown
 - **Engine**: Godot 4.6

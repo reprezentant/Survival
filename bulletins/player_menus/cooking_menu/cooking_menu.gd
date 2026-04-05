@@ -370,6 +370,10 @@ func _setup_connections() -> void:
 	starting_cooking_slot.set_name("StartingCookingSlot")
 	final_cooking_slot.set_name("FinalCookingSlot")
 	
+	# WAŻNE: Najpierw zaktualizuj cooking_state z cooker
+	cooking_state = interactable_cooker.state
+	print("[DEBUG] CookingMenu: Current cooking state: ", cooking_state)
+	
 	# Initialize slots based on current cooking state
 	print("[DEBUG] CookingMenu: Initializing state: ", cooking_state)
 	if cooking_state == InteractableCooker.CookingStates.Cooked:
@@ -382,6 +386,11 @@ func _setup_connections() -> void:
 			print("[DEBUG] CookingMenu: Restored cooked item: ", cooked_item_data)
 		else:
 			print("[DEBUG] CookingMenu: No cooked item data found")
+		
+		# WAŻNE: Upewnij się, że starting slot jest pusty po zakończeniu gotowania
+		starting_cooking_slot.set_item_key(null)
+		starting_cooking_slot.cooking_in_progress = false
+		print("[DEBUG] CookingMenu: Cleared starting slot for Cooked state")
 	elif cooking_state == InteractableCooker.CookingStates.Cooking:
 		# Resume countdown display for ongoing cooking
 		var progress_container = find_child("ProgressContainer", true, false)
@@ -393,36 +402,66 @@ func _setup_connections() -> void:
 				add_child(countdown_timer)
 			countdown_timer.start()
 			print("[DEBUG] CookingMenu: Resumed countdown for ongoing cooking")
-			
-			# Show current recipe being cooked
-			if cooking_recipe and cooking_amount > 1:
-				starting_cooking_slot.set_item_key({
-					"item_key": cooking_recipe.uncooked_item,
-					"amount": cooking_amount
-				})
-				starting_cooking_slot.cooking_in_progress = true
-				
-			# Disable cook button
-			cook_btn = find_child("CookButton", true, false)
-			if cook_btn:
-				cook_btn.disabled = true
+		
+		# Show current recipe being cooked regardless of amount
+		# ALE tylko jeśli cooking_recipe nadal istnieje (nie został zresetowany po zakończeniu)
+		if cooking_recipe and interactable_cooker.cooking_recipe:
+			starting_cooking_slot.set_item_key({
+				"item_key": cooking_recipe.uncooked_item,
+				"amount": cooking_amount
+			})
+			starting_cooking_slot.cooking_in_progress = true
+			print("[DEBUG] CookingMenu: Restored cooking recipe: ", cooking_recipe.uncooked_item, " amount: ", cooking_amount)
+		elif not interactable_cooker.cooking_recipe:
+			# Jeśli cooker nie ma recipe (po zakończeniu), wyczyść starting slot
+			starting_cooking_slot.set_item_key(null)
+			starting_cooking_slot.cooking_in_progress = false
+			print("[DEBUG] CookingMenu: Cleared starting slot - no recipe in cooker")
+		
+		# Disable cook button during cooking
+		cook_btn = find_child("CookButton", true, false)
+		if cook_btn:
+			cook_btn.disabled = true
 	elif cooking_state == InteractableCooker.CookingStates.ReadyToCook:
-		# If cooker has recipe and amount, restore to slot (only if no stored slot items to restore later)
-		if interactable_cooker.cooking_recipe and interactable_cooker.cooking_amount > 0 and stored_slot_items.is_empty():
+		# Only restore if cooker actually has a recipe (not just default amount)
+		if interactable_cooker.cooking_recipe and stored_slot_items.is_empty():
 			starting_cooking_slot.set_item_key({
 				"item_key": interactable_cooker.cooking_recipe.uncooked_item,
 				"amount": interactable_cooker.cooking_amount
 			})
 			print("[DEBUG] CookingMenu: Restored ReadyToCook state with recipe: ", interactable_cooker.cooking_recipe.uncooked_item, " amount: ", interactable_cooker.cooking_amount)
-			# Enable cook button since we have valid items
+			# NIE wywołuj starting_ingredient_enabled.emit() żeby uniknąć loops!
+			# Zamiast tego przygotuj recipe lokalnie
+			cooking_recipe = interactable_cooker.cooking_recipe
+			cooking_amount = interactable_cooker.cooking_amount
+		
 		cook_btn = find_child("CookButton", true, false)
 		if cook_btn:
-			cook_btn.disabled = false
+			# Only enable button if we actually have items to cook
+			var has_items = (starting_cooking_slot.item_key != null)
+			cook_btn.disabled = not has_items
+			print("[DEBUG] CookingMenu: Cook button enabled: ", has_items)
+	else:
+		# Clear slots for inactive state
+		if starting_cooking_slot:
 			starting_cooking_slot.set_item_key(null)
+		if final_cooking_slot:
 			final_cooking_slot.set_item_key(null)
 	
-	# Restore stored slot items if any (from previous menu closure)
-	_restore_stored_slot_items(starting_cooking_slot, final_cooking_slot)
+	# Zawsze przywróć slot items jeśli dostępne (chyba że jest conflict z cooking state)
+	if not stored_slot_items.is_empty():
+		# NIE przywracaj starting slot dla stanu Cooked - surowe składniki zostały ugotowane!
+		if cooking_state == InteractableCooker.CookingStates.Cooked:
+			# Tylko przywróć final slot, starting slot ma zostać pusty
+			if stored_slot_items.has("final_slot") and final_cooking_slot:
+				final_cooking_slot.set_item_key(stored_slot_items["final_slot"])
+				print("[DEBUG] CookingMenu: Restored only final slot for Cooked state")
+		else:
+			# Normalnie przywróć wszystkie sloty
+			_restore_stored_slot_items(starting_cooking_slot, final_cooking_slot)
+			print("[DEBUG] CookingMenu: Restored stored slot items for state:", cooking_state)
+	else:
+		print("[DEBUG] CookingMenu: No stored slot items to restore")
 
 
 # Update countdown display based on amount of items in starting slot
@@ -435,6 +474,10 @@ func update_countdown_display(amount: int) -> void:
 	if amount <= 0:
 		countdown_label.text = "--"
 	else:
+		# Handle adding items during cooking
+		if cooking_state == InteractableCooker.CookingStates.Cooking:
+			_handle_cooking_amount_change(amount)
+		
 		# 1 meat = 5 seconds, so amount * 5
 		var total_seconds = amount * 5
 		var minutes = floori(float(total_seconds) / 60.0)  # Floor division for minutes
@@ -444,14 +487,47 @@ func update_countdown_display(amount: int) -> void:
 	print("[DEBUG] CookingMenu: Updated countdown to: ", countdown_label.text, " (amount: ", amount, ")")
 
 
+# Handle adding items during active cooking
+func _handle_cooking_amount_change(new_amount: int) -> void:
+	if not cooking_recipe or not interactable_cooker:
+		return
+		
+	var old_amount = cooking_amount
+	var added_amount = new_amount - old_amount
+	
+	if added_amount > 0:
+		print("[DEBUG] CookingMenu: Adding ", added_amount, " items during cooking")
+		
+		# Update amounts
+		cooking_amount = new_amount
+		interactable_cooker.cooking_amount = new_amount
+		
+		# Extend cooking timer
+		if interactable_cooker.cooking_timer and interactable_cooker.cooking_timer.time_left > 0:
+			var additional_time = added_amount * cooking_recipe.cooking_time
+			var current_time_left = interactable_cooker.cooking_timer.time_left
+			var new_total_time = current_time_left + additional_time
+			
+			# Stop and restart timer with extended time
+			interactable_cooker.cooking_timer.stop()
+			interactable_cooker.cooking_timer.start(new_total_time)
+			
+			print("[DEBUG] CookingMenu: Extended cooking time by ", additional_time, " seconds. New total: ", new_total_time)
+
+
 func uncooked_item_added() -> void:
+	# Don't enable cooking button if already cooking
+	if cooking_state == InteractableCooker.CookingStates.Cooking:
+		print("[DEBUG] CookingMenu: Already cooking, ignoring uncooked_item_added")
+		return
+		
 	var cook_btn = find_child("CookButton", true, false)
 	var starting_slot = find_child("StartingCookingSlot", true, false)
 	
 	if cook_btn:
 		cook_btn.disabled = false
 	
-	# Get item key and amount for batch cooking
+	# TYLKO przygotuj dane do gotowania, ale NIE zmieniaj stanu cooker'a
 	if starting_slot:
 		var slot_data = starting_slot.item_key
 		var key = null
@@ -464,13 +540,13 @@ func uncooked_item_added() -> void:
 			key = slot_data
 			amount = 1
 		
+		# Przygotuj recipe ale nie zmieniaj stanu cooker'a
 		cooking_recipe = ItemConfig.get_item_resource(key).cooking_recipe
 		time_cooked = 0
+		cooking_amount = amount
 		
-		print("[DEBUG] CookingMenu: Batch cooking ", amount, " items, total time: ", cooking_recipe.cooking_time * amount, " seconds")
-		
-		# Pass the amount to cooker for proper state saving
-		interactable_cooker.uncooked_item_added(cooking_recipe, amount)
+		print("[DEBUG] CookingMenu: Prepared for cooking ", amount, " items, recipe ready")
+		# NIE wywołuj interactable_cooker.uncooked_item_added() tutaj!
 
 
 func uncooked_item_removed() -> void:
@@ -479,14 +555,30 @@ func uncooked_item_removed() -> void:
 	if cook_btn:
 		cook_btn.disabled = true
 	cooking_recipe = null
+	cooking_amount = 1
 	time_cooked = 0
-	interactable_cooker.uncooked_item_removed()
+	
+	# Wywołaj reset cooker'a tylko jeśli nie gotuje się aktywnie
+	if cooking_state != InteractableCooker.CookingStates.Cooking:
+		interactable_cooker.uncooked_item_removed()
 
 
 func start_cooking() -> void:
 	var starting_slot = find_child("StartingCookingSlot", true, false)
 	var cook_btn = find_child("CookButton", true, false) 
 	var progress_container = find_child("ProgressContainer", true, false)
+	
+	if not cooking_recipe:
+		print("[ERROR] CookingMenu: No cooking recipe prepared!")
+		return
+	
+	# TERAZ ustaw stan cooker'a na ReadyToCook i rozpocznij gotowanie
+	interactable_cooker.uncooked_item_added(cooking_recipe, cooking_amount)
+	
+	# Wyczyść stored slot items - nie chcemy przywracać surowych składników później
+	if interactable_cooker:
+		interactable_cooker.clear_stored_slot_items()
+		print("[DEBUG] CookingMenu: Cleared stored slot items at cooking start")
 	
 	if starting_slot:
 		starting_slot.cooking_in_progress = true
@@ -502,7 +594,7 @@ func start_cooking() -> void:
 			# Update cooking amount in cooker
 			interactable_cooker.cooking_amount = amount
 	
-	var total_cooking_time = cooking_recipe.cooking_time * amount
+	var total_cooking_time = float(cooking_recipe.cooking_time) * amount
 	remaining_time = total_cooking_time - time_cooked
 	print("[DEBUG] CookingMenu: Starting batch cooking for ", amount, " items, total time: ", total_cooking_time, " seconds")
 	
@@ -510,6 +602,10 @@ func start_cooking() -> void:
 	if cooking_state != InteractableCooker.CookingStates.Cooking:
 		interactable_cooker.start_cooking()
 		EventSystem.SFX_play_sfx.emit(SFXConfig.Keys.UIClick)
+		# Clear stored slot items after cooking starts (no longer needed)
+		if interactable_cooker:
+			interactable_cooker.clear_stored_slot_items()
+		print("[DEBUG] CookingMenu: Cleared stored slot items after starting cooking")
 	
 	# Setup countdown display only
 	if progress_container:
@@ -539,10 +635,14 @@ func _update_countdown() -> void:
 		
 		if interactable_cooker.cooking_timer:
 			var time_left = interactable_cooker.cooking_timer.time_left
-			var total_time = cooking_recipe.cooking_time * cooking_amount
+			var total_time = float(cooking_recipe.cooking_time) * cooking_amount
 			
 			if countdown_label:
-				countdown_label.text = str(ceil(time_left))
+				# Ujednolicony format MM:SS  
+				var remaining_seconds = int(ceil(time_left))
+				var minutes = remaining_seconds / 60.0
+				var seconds = remaining_seconds % 60
+				countdown_label.text = "%d:%02d" % [minutes, seconds]
 				
 			if progress_bar:
 				var progress = 1.0 - (time_left / total_time) if total_time > 0 else 1.0
@@ -551,27 +651,94 @@ func _update_countdown() -> void:
 
 # Called when InteractableCooker finishes cooking
 func on_cooking_finished() -> void:
+	print("==================================================")
+	print("[CRITICAL DEBUG] CookingMenu: on_cooking_finished() CALLED!")
+	print("==================================================")
+	
+	# Natychmiast wyczyść stored slot items żeby nie było konfliktów
+	if interactable_cooker:
+		interactable_cooker.clear_stored_slot_items()
+		print("[CRITICAL DEBUG] CookingMenu: Cleared stored slot items IMMEDIATELY")
+	
 	var final_slot = find_child("FinalCookingSlot", true, false)
 	var starting_slot = find_child("StartingCookingSlot", true, false)
 	var progress_container = find_child("ProgressContainer", true, false)
 	
 	print("[DEBUG] CookingMenu: InteractableCooker finished cooking")
+	print("[DEBUG] CookingMenu: Starting slot before clear: ", starting_slot.item_key if starting_slot else "no slot")
 	
 	# Stop countdown timer
 	if countdown_timer:
 		countdown_timer.stop()
 	
-	# Update UI to show cooked items
+	# Update UI to show cooked items with stacking support
 	if final_slot and interactable_cooker.cooked_item_data.has("item_key"):
-		final_slot.set_item_key({
-			"item_key": interactable_cooker.cooked_item_data["item_key"],
-			"amount": interactable_cooker.cooked_item_data["amount"]
-		})
-		print("[DEBUG] CookingMenu: Set final slot to: ", interactable_cooker.cooked_item_data)
+		# Check if final slot already has items
+		var existing_amount = 0
+		var new_item_key = interactable_cooker.cooked_item_data["item_key"]
+		var new_amount = interactable_cooker.cooked_item_data["amount"]
+		
+		if final_slot.item_key != null:
+			# Final slot has items - check if we can stack
+			var existing_key = null
+			if typeof(final_slot.item_key) == TYPE_DICTIONARY and final_slot.item_key.has("item_key"):
+				existing_key = final_slot.item_key["item_key"]
+				existing_amount = final_slot.item_key.get("amount", 1)
+			else:
+				existing_key = final_slot.item_key
+				existing_amount = 1
+			
+			if existing_key == new_item_key:
+				# Same item - stack them
+				var total_amount = existing_amount + new_amount
+				final_slot.set_item_key({
+					"item_key": new_item_key,
+					"amount": total_amount
+				})
+				print("[DEBUG] CookingMenu: Stacked cooked items. Previous: ", existing_amount, ", New: ", new_amount, ", Total: ", total_amount)
+			else:
+				# Different item - replace
+				final_slot.set_item_key({
+					"item_key": new_item_key,
+					"amount": new_amount
+				})
+				print("[DEBUG] CookingMenu: Replaced different item with: ", interactable_cooker.cooked_item_data)
+		else:
+			# Final slot empty - set new items
+			final_slot.set_item_key({
+				"item_key": new_item_key,
+				"amount": new_amount
+			})
+			print("[DEBUG] CookingMenu: Set new cooked items: ", interactable_cooker.cooked_item_data)
 	
 	if starting_slot:
+		print("[CRITICAL DEBUG] CookingMenu: CLEARING starting slot - before: ", starting_slot.item_key)
 		starting_slot.set_item_key(null)
+		print("[CRITICAL DEBUG] CookingMenu: CLEARING starting slot - after: ", starting_slot.item_key)
 		starting_slot.cooking_in_progress = false
+	
+	# WAŻNE: Reset lokalnych zmiennych żeby nic nie przywracało składników
+	cooking_recipe = null
+	cooking_amount = 1
+	time_cooked = 0
+	print("[CRITICAL DEBUG] CookingMenu: Reset local cooking variables")
+	
+	# WAŻNE: Wyczyść zapisane slot items żeby surowe składniki nie wracały!
+	if interactable_cooker:
+		# Kompletnie wyczyść stored slot items 
+		interactable_cooker.clear_stored_slot_items()
+		print("[DEBUG] CookingMenu: Cleared stored slot items after cooking finished")
+		
+		# Dodatkowo, upewnij się że nie ma starting slot w stored items
+		var current_stored = interactable_cooker.get_stored_slot_items()
+		if current_stored.has("starting_slot"):
+			current_stored.erase("starting_slot")
+			interactable_cooker.store_slot_items(current_stored)
+			print("[CRITICAL DEBUG] CookingMenu: Force-removed starting slot from stored items")
+		
+		# Aktualizuj lokalny cooking_state
+		cooking_state = interactable_cooker.state
+		print("[CRITICAL DEBUG] CookingMenu: Updated cooking_state to: ", cooking_state)
 	
 	# Reset progress bar and countdown
 	if progress_container:
@@ -613,26 +780,38 @@ func _switch_to_journal() -> void:
 	pass
 
 
-# Save slot items before closing menu
+# Save slot items before closing menu - ZAWSZE zapisuj stan
 func _save_slot_items_before_close() -> void:
 	var slot_data = {}
 	
 	var starting_slot = find_child("StartingCookingSlot", true, false)
 	var final_slot = find_child("FinalCookingSlot", true, false)
 	
-	# Only save if cooking is not in progress and not cooked
-	if cooking_state == InteractableCooker.CookingStates.Inactive or cooking_state == InteractableCooker.CookingStates.ReadyToCook:
-		if starting_slot and starting_slot.item_key != null:
-			slot_data["starting_slot"] = starting_slot.item_key
-			print("[DEBUG] CookingMenu: Saving starting slot: ", starting_slot.item_key)
-		
-		if final_slot and final_slot.item_key != null:
-			slot_data["final_slot"] = final_slot.item_key
-			print("[DEBUG] CookingMenu: Saving final slot: ", final_slot.item_key)
-		
-		# Store in cooker for next opening
-		if interactable_cooker:
-			interactable_cooker.store_slot_items(slot_data)
+	# ZAWSZE zapisz current slot items - gracz ma prawo wyjść i wrócić
+	# ALE nie zapisuj starting slot jeśli właśnie skończyło się gotowanie
+	var should_save_starting = true
+	if cooking_state == InteractableCooker.CookingStates.Cooked:
+		should_save_starting = false
+		print("[DEBUG] CookingMenu: Skipping starting slot save - cooking just finished")
+	
+	if starting_slot and starting_slot.item_key != null and should_save_starting:
+		slot_data["starting_slot"] = starting_slot.item_key
+		print("[DEBUG] CookingMenu: Saving starting slot:", starting_slot.item_key)
+	
+	if final_slot and final_slot.item_key != null:
+		slot_data["final_slot"] = final_slot.item_key
+		print("[DEBUG] CookingMenu: Saving final slot:", final_slot.item_key)
+	
+	# Zapisuj state w cooker również tijdens cooking
+	if cooking_state == InteractableCooker.CookingStates.Cooking:
+		if interactable_cooker and cooking_recipe:
+			interactable_cooker.cooking_recipe = cooking_recipe
+			interactable_cooker.cooking_amount = cooking_amount
+			print("[DEBUG] CookingMenu: Preserved cooking recipe during close:", cooking_recipe.uncooked_item)
+	
+	# Store in cooker for next opening  
+	if interactable_cooker:
+		interactable_cooker.store_slot_items(slot_data)
 
 
 # Restore stored slot items when menu reopens
@@ -646,9 +825,9 @@ func _restore_stored_slot_items(starting_slot, final_slot) -> void:
 	if stored_slot_items.has("starting_slot") and starting_slot:
 		starting_slot.set_item_key(stored_slot_items["starting_slot"])
 		print("[DEBUG] CookingMenu: Restored starting slot: ", stored_slot_items["starting_slot"])
-		# Emit signal to notify cooker about the restored item
+		# Emit signal to notify cooker about the restored item and enable cook button
 		starting_slot.starting_ingredient_enabled.emit()
-	
+		
 	if stored_slot_items.has("final_slot") and final_slot:
 		final_slot.set_item_key(stored_slot_items["final_slot"])
 		print("[DEBUG] CookingMenu: Restored final slot: ", stored_slot_items["final_slot"])
@@ -656,6 +835,8 @@ func _restore_stored_slot_items(starting_slot, final_slot) -> void:
 	# Clear stored items after restoring
 	if interactable_cooker:
 		interactable_cooker.clear_stored_slot_items()
+	
+	print("[DEBUG] CookingMenu: Successfully restored slot items")
 
 func _switch_journal_category(_category: JournalConfig.Category) -> void:
 	# Do nothing - cooking menu doesn't use journal

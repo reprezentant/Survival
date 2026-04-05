@@ -194,17 +194,31 @@ func _drop_to_world() -> void:
 	# Check if item requires confirmation before dropping
 	var item_resource = ItemConfig.get_item_resource(raw_key)
 	if item_resource.requires_drop_confirmation:
-		# Show confirmation popup for valuable items
-		var confirmation_popup := ConfirmationDropPopup.new()
-		get_tree().current_scene.add_child(confirmation_popup)
-		confirmation_popup.setup(item_resource)
+		# Check if item will disappear (no pickuppable scene)
+		var will_disappear = not ItemConfig.has_pickuppable_scene(raw_key)
 		
-		confirmation_popup.drop_confirmed.connect(func():
-			# Drop single item when confirmed
-			EventSystem.INV_drop_item_to_world.emit(get_index(), self is HotbarSlot, 1)
-		)
-		# If cancelled, do nothing - item stays in inventory
-		return
+		# For single items, show confirmation with disappear warning if needed
+		if amount <= 1:
+			var confirmation_popup := ConfirmationDropPopup.new()
+			get_tree().current_scene.add_child(confirmation_popup)
+			confirmation_popup.setup(item_resource, will_disappear)
+			
+			confirmation_popup.drop_confirmed.connect(func():
+				# Drop single item when confirmed
+				EventSystem.INV_drop_item_to_world.emit(get_index(), self is HotbarSlot, 1)
+			)
+			# If cancelled, do nothing - item stays in inventory
+			return
+		else:
+			# For stacked items, show quantity popup with enhanced warning
+			var quantity_popup := DropQuantityPopup.new()
+			get_viewport().add_child(quantity_popup)
+			var warning_text = "ostrzeżenie" if not will_disappear else "ZNIKNĄ NA ZAWSZE"
+			quantity_popup.setup(raw_key, amount, "Wyrzuć", true, warning_text)
+			quantity_popup.drop_confirmed.connect(func(drop_amount: int) -> void:
+				EventSystem.INV_drop_item_to_world.emit(get_index(), self is HotbarSlot, drop_amount)
+			)
+			return
 
 	# Single item — drop immediately (no confirmation needed)
 	if amount <= 1:
@@ -212,11 +226,11 @@ func _drop_to_world() -> void:
 		return
 
 	# Stack — ask how many
-	var popup := DropQuantityPopup.new()
-	get_viewport().add_child(popup)
-	popup.setup(raw_key, amount)
+	var quantity_popup := DropQuantityPopup.new()
+	get_viewport().add_child(quantity_popup)
+	quantity_popup.setup(raw_key, amount)
 
-	popup.drop_confirmed.connect(func(drop_amount: int) -> void:
+	quantity_popup.drop_confirmed.connect(func(drop_amount: int) -> void:
 		EventSystem.INV_drop_item_to_world.emit(get_index(), self is HotbarSlot, drop_amount)
 	)
 
@@ -236,7 +250,15 @@ func _gui_input(event: InputEvent) -> void:
 
 	var actions: Array[String] = []
 	if resource is ConsumableItemResource:
-		actions.append("Eat")
+		actions.append("Zjedz")
+	
+	# Add split stack option for stackable items with amount > 1
+	var current_amount = 1
+	if typeof(item_key) == TYPE_DICTIONARY and item_key.has("amount"):
+		current_amount = int(item_key.amount)
+	
+	if current_amount > 1:
+		actions.append("Podziel stos")
 
 	if actions.is_empty():
 		return
@@ -247,8 +269,10 @@ func _gui_input(event: InputEvent) -> void:
 	get_viewport().add_child(menu)
 	menu.setup(actions, get_global_mouse_position())
 	menu.action_selected.connect(func(action: String) -> void:
-		if action == "Eat":
+		if action == "Zjedz":
 			_eat_item(key)
+		elif action == "Podziel stos":
+			_split_stack()
 	)
 
 
@@ -261,4 +285,36 @@ func _eat_item(key: ItemConfig.Keys) -> void:
 	EventSystem.INV_delete_item_by_index.emit(get_index(), self is HotbarSlot)
 	EventSystem.SFX_play_sfx.emit(SFXConfig.Keys.Eat)
 	EventSystem.JOU_test.emit(int(key))
+
+
+func _split_stack() -> void:
+	if typeof(item_key) != TYPE_DICTIONARY or not item_key.has("amount"):
+		return
+		
+	var current_amount = int(item_key.amount)
+	if current_amount <= 1:
+		return
+		
+	var raw_key = item_key.item_key
+	var max_split = current_amount - 1  # Must leave at least 1 in original stack
+	
+	var split_popup := DropQuantityPopup.new()
+	get_viewport().add_child(split_popup)
+	split_popup.setup(raw_key, max_split, "Podziel stos")
+	
+	split_popup.drop_confirmed.connect(func(split_amount: int) -> void:
+		_perform_stack_split(raw_key, split_amount, current_amount)
+	)
+
+
+func _perform_stack_split(raw_key, split_amount: int, original_amount: int) -> void:
+	# Reduce original stack first
+	var remaining_amount = original_amount - split_amount
+	set_item_key({"item_key": raw_key, "amount": remaining_amount})
+	
+	# Add split items to inventory - let inventory manager find the best spot
+	EventSystem.INV_add_item_to_inventory.emit(raw_key, split_amount)
+	
+	print("[DEBUG] InventorySlot: Split stack - kept ", remaining_amount, " splitting ", split_amount, " items")
+	EventSystem.SFX_play_sfx.emit(SFXConfig.Keys.UIClick)
 

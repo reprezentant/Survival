@@ -9,7 +9,7 @@ func _init() -> void:
 	layer = 100
 
 
-func setup(item_key, max_amount: int) -> void:
+func setup(item_key, max_amount: int, action_text: String = "Wyrzuć", show_warning: bool = false, _warning_type: String = "ostrzeżenie") -> void:
 	# Full-screen root control on this CanvasLayer
 	var root := Control.new()
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -43,9 +43,31 @@ func setup(item_key, max_amount: int) -> void:
 	# Title
 	var item_name := ItemConfig.get_item_resource(item_key).display_name
 	var title := Label.new()
-	title.text = "Wyrzuć " + item_name + "?"
+	title.text = action_text + " " + item_name + "?"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)
+	
+	# Warning message (if needed)
+	if show_warning:
+		var warning_container := HBoxContainer.new()
+		warning_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		warning_container.add_theme_constant_override("separation", 8)
+		vbox.add_child(warning_container)
+		
+		var warning_icon := Label.new()
+		warning_icon.text = "⚠️"
+		warning_icon.add_theme_font_size_override("font_size", 18)
+		warning_container.add_child(warning_icon)
+		
+		var warning_msg := Label.new()
+		if _warning_type == "ZNIKNĄ NA ZAWSZE":
+			warning_msg.text = "Te przedmioty ZNIKNĄ NA ZAWSZE!"
+			warning_msg.add_theme_color_override("font_color", Color.RED)
+			warning_msg.add_theme_font_size_override("font_size", 14)
+		else:
+			warning_msg.text = "Ten przedmiot jest cenny i może się zgubić!"
+			warning_msg.add_theme_color_override("font_color", Color.ORANGE_RED)
+		warning_container.add_child(warning_msg)
 
 	# Amount counter
 	var counter_label := Label.new()
@@ -93,7 +115,7 @@ func setup(item_key, max_amount: int) -> void:
 	hbox.add_child(cancel_btn)
 
 	var drop_btn := Button.new()
-	drop_btn.text = "Wyrzuć"
+	drop_btn.text = action_text
 	drop_btn.custom_minimum_size = Vector2(110, 36)
 	drop_btn.pressed.connect(func() -> void:
 		drop_confirmed.emit(int(spinbox.value))

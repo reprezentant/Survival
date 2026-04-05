@@ -12,3 +12,4 @@ display_name = "Cooked Meat"
 icon = ExtResource("1_ws11x")
 description = "Nutritious meat."
 is_equippable = true
+requires_drop_confirmation = true

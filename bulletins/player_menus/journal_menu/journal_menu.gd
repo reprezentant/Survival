@@ -1,16 +1,12 @@
 extends PlayerMenuBase
 
 
-@onready var items_tab_btn: Button = %ItemsTabBtn
-@onready var creatures_tab_btn: Button = %CreaturesTabBtn
-@onready var objects_tab_btn: Button = %ObjectsTabBtn
-@onready var journal_entry_container: VBoxContainer = %JournalEntryContainer
-@onready var journal_info_title: Label = %JournalInfoTitle
-@onready var journal_info_desc: Label = %JournalInfoDesc
+# Zmienne już zdefiniowane w PlayerMenuBase:
+# - items_tab_btn, creatures_tab_btn, objects_tab_btn
+# - journal_entry_container, journal_info_title, journal_info_desc
+# - journal_states, entry_buttons
 
-var journal_states: Dictionary = {}
 var current_category: JournalConfig.Category = JournalConfig.Category.ITEMS
-var entry_buttons: Array = []
 
 
 func _ready() -> void:

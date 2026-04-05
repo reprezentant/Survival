@@ -112,6 +112,7 @@ const PICKUPPABLE_ITEM_SCENES := {
 	Keys.Log : "res://interactables/pickuppables/rigid_pickuppable_log.tscn",
 	Keys.Coal : "res://interactables/pickuppables/rigid_pickuppable_coal.tscn",
 	Keys.RawMeat : "res://interactables/pickuppables/rigid_pickuppable_raw_meat.tscn",
+	Keys.CookedMeat : "res://interactables/pickuppables/rigid_pickuppable_cooked_meat.tscn",
 	Keys.Flintstone : "res://interactables/pickuppables/rigid_pickuppable_flintstone.tscn"
 }
 

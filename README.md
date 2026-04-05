@@ -26,8 +26,10 @@ Collect Resources → Craft Tools → Unlock Recipes → Build Raft → Escape
 
 ### 🎒 **Inventory & Items (19 types)**
 - **Inventory**: 28 slots + 9 hotbar slots
-- **Mechanics**: Stacking (max 50), drag-and-drop, auto-save
-- **Drop Protection**: Valuable items require confirmation popup
+- **Mechanics**: Stacking (max 50), drag-and-drop, auto-save, stack splitting
+- **Drop Protection**: Valuable items require confirmation popup with permanence warnings
+- **Context Menu**: Right-click for stack splitting and item management
+- **Warning System**: Clear alerts for items that disappear permanently vs recoverable drops
 - **Item Types**: Resources, Tools, Consumables, Constructables
 
 | Resources | Tools | Constructables |
@@ -54,6 +56,8 @@ Rope (Plant×2)
 - **Batch Cooking**: Cook multiple items simultaneously
 - **Progress Tracking**: Visual progress bar + countdown timer
 - **Persistent State**: Progress saved when closing menu
+- **Quantity Selection**: Choose how many items to cook with popup dialog
+- **Smart State Management**: No automatic item placement, prevents unwanted cooking
 - **Recipe**: RawMeat → CookedMeat (5 seconds each)
 
 ### 📚 **Journal System**

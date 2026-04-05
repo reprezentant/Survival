@@ -11,4 +11,5 @@ display_name = "Raw Meat"
 icon = ExtResource("1_i155m")
 description = "Has potential, don't eat yet."
 is_equippable = false
+requires_drop_confirmation = true
 cooking_recipe = ExtResource("1_t0fbb")
