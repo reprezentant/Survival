@@ -1,0 +1,10 @@
+class_name UIButton
+extends Button
+
+
+func _ready() -> void:
+	pressed.connect(clicked)
+
+
+func clicked() -> void:
+	EventSystem.SFX_play_sfx.emit(SFXConfig.Keys.UIClick)

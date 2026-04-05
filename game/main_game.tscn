@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://cxyrm16le8crr"]
+
+[ext_resource type="Script" uid="uid://6vdogx0wlef4" path="res://game/managers/stage_controller.gd" id="1_pjwhi"]
+[ext_resource type="Script" uid="uid://di8ncabrg7j03" path="res://game/managers/hud_controller.gd" id="3_6gv57"]
+[ext_resource type="Script" uid="uid://e17jxs7v0tpe" path="res://game/managers/music_controller.gd" id="4_o3ghp"]
+[ext_resource type="Script" uid="uid://dpjlrd5do02ic" path="res://game/managers/sfx_controller.gd" id="5_nico0"]
+[ext_resource type="Script" uid="uid://bmjn8exettme3" path="res://game/managers/game_fade_controller.gd" id="6_iljxs"]
+[ext_resource type="Script" uid="uid://lkpyhpkpxr31" path="res://game/managers/settings_controller.gd" id="8_nux32"]
+[ext_resource type="Script" uid="uid://kuvd3isa3umt" path="res://game/managers/bulletin_controller.gd" id="9_g8ktk"]
+[ext_resource type="PackedScene" uid="uid://cpa1jv2ke0s03" path="res://ui/hud/hud.tscn" id="9_x41ec"]
+[ext_resource type="Script" path="res://game/managers/journal_manager.gd" id="10_journal"]
+
+[sub_resource type="Animation" id="Animation_jjo07"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoadingLabel:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_b10ci"]
+resource_name = "loading_animation"
+length = 1.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoadingLabel:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8, 1.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.392157), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LoadingLabel:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_wisqy"]
+_data = {
+&"RESET": SubResource("Animation_jjo07"),
+&"loading_animation": SubResource("Animation_b10ci")
+}
+
+[node name="MainGame" type="Node" unique_id=2079648233]
+process_mode = 3
+
+[node name="StageController" type="Node" parent="." unique_id=378432013]
+script = ExtResource("1_pjwhi")
+
+[node name="JournalManager" type="Node" parent="." unique_id=2143567890]
+script = ExtResource("10_journal")
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=900495907]
+
+[node name="BulletinController" type="Node" parent="UILayer" unique_id=1281181321]
+script = ExtResource("9_g8ktk")
+
+[node name="HUDController" type="Node" parent="UILayer" unique_id=1067582489]
+script = ExtResource("3_6gv57")
+
+[node name="HUD" parent="UILayer/HUDController" unique_id=1240492712 instance=ExtResource("9_x41ec")]
+
+[node name="MusicController" type="AudioStreamPlayer" parent="." unique_id=418874429]
+bus = &"Music"
+script = ExtResource("4_o3ghp")
+
+[node name="SFXController" type="AudioStreamPlayer" parent="." unique_id=273016581]
+script = ExtResource("5_nico0")
+
+[node name="FadingLayer" type="CanvasLayer" parent="." unique_id=815035643]
+layer = 99
+
+[node name="GameFadeController" type="ColorRect" parent="FadingLayer" unique_id=457268168 node_paths=PackedStringArray("animation_player")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("6_iljxs")
+animation_player = NodePath("AnimationPlayer")
+
+[node name="LoadingLabel" type="Label" parent="FadingLayer/GameFadeController" unique_id=474610483]
+visible = false
+modulate = Color(1, 1, 1, 0.5885662)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "Loading"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="FadingLayer/GameFadeController" unique_id=1697700915]
+libraries/ = SubResource("AnimationLibrary_wisqy")
+
+[node name="SettingsController" type="Node" parent="." unique_id=1269789417]
+script = ExtResource("8_nux32")

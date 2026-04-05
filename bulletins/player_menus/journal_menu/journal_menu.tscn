@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://dy8n8v0ck8bsi"]
+
+[ext_resource type="PackedScene" uid="uid://ft2mnrxg3awc" path="res://bulletins/player_menus/player_menu_base.tscn" id="1_ocp6e"]
+[ext_resource type="Script" path="res://bulletins/player_menus/journal_menu/journal_menu.gd" id="2_jnfdn"]
+
+[node name="JournalMenu" instance=ExtResource("1_ocp6e")]
+script = ExtResource("2_jnfdn")
+
+[ext_resource type="PackedScene" uid="uid://ft2mnrxg3awc" path="res://bulletins/player_menus/player_menu_base.tscn" id="1_7x8ag"]
+[ext_resource type="Script" path="res://bulletins/player_menus/journal_menu/journal_menu.gd" id="2_pcj4q"]
+
+[node name="JournalMenu" instance=ExtResource("1_7x8ag")]
+script = ExtResource("2_pcj4q")

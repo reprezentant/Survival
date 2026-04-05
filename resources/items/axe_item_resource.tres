@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponItemResource" load_steps=3 format=3 uid="uid://bnww6db1gt3v8"]
+
+[ext_resource type="Script" path="res://resources/items/weapon_item_resource.gd" id="1_h2f67"]
+[ext_resource type="Texture2D" uid="uid://d0haf05pqea3r" path="res://textures/item_icons/axe.png" id="1_ht1wt"]
+
+[resource]
+script = ExtResource("1_h2f67")
+damage = 20
+range = 1.5
+energy_change_per_use = -0.5
+item_key = 10
+display_name = "Axe"
+icon = ExtResource("1_ht1wt")
+description = "A DIY axe. Useful for chopping trees."
+is_equippable = true
+requires_drop_confirmation = true

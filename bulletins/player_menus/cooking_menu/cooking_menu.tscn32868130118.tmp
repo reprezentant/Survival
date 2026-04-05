@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cc6id7hgabroj"]
+
+[ext_resource type="PackedScene" uid="uid://ft2mnrxg3awc" path="res://bulletins/player_menus/player_menu_base.tscn" id="1_a4uyd"]
+[ext_resource type="Script" uid="uid://dkfi7jpeast7r" path="res://bulletins/player_menus/cooking_menu/cooking_menu.gd" id="2_rgq5t"]
+
+[node name="CookingMenu" unique_id=775315788 instance=ExtResource("1_a4uyd")]
+script = ExtResource("2_rgq5t")
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer#CenterContainer" type="CenterContainer" parent="." index="1" unique_id=1523900009]
+layout_mode = 0
+size_flags_vertical = 3
+
+[node name="CloseButton" parent="." index="2"]
+anchors_preset = 1
+grow_vertical = 0

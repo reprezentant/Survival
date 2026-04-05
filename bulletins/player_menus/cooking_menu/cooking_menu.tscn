@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://cc6id7hgabroj"]
+
+[ext_resource type="PackedScene" uid="uid://ft2mnrxg3awc" path="res://bulletins/player_menus/player_menu_base.tscn" id="1_a4uyd"]
+[ext_resource type="PackedScene" uid="uid://b7fx3qv0bkluk" path="res://ui/custom_nodes/inventory_slot.tscn" id="2_jxcgn"]
+[ext_resource type="Script" uid="uid://dkfi7jpeast7r" path="res://bulletins/player_menus/cooking_menu/cooking_menu.gd" id="2_rgq5t"]
+[ext_resource type="Script" uid="uid://cuff7bk2laqng" path="res://ui/custom_nodes/starting_cooking_slot.gd" id="3_i6ca2"]
+[ext_resource type="Texture2D" uid="uid://dte26mhleojvf" path="res://textures/square32.png" id="3_l84wc"]
+[ext_resource type="Texture2D" uid="uid://fxy6dfed74j3" path="res://textures/panel_blue.png" id="4_e1bwi"]
+[ext_resource type="Script" uid="uid://46n2q5vbunxl" path="res://ui/custom_nodes/final_cooking_slot.gd" id="5_rvcl0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qqran"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_62juq"]
+bg_color = Color(0, 0, 0, 0.352941)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndbf7"]
+bg_color = Color(0, 0, 0, 0.235294)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o5xvh"]
+bg_color = Color(0.32549, 0.32549, 0.32549, 1)
+
+[node name="CookingMenu" unique_id=775315788 instance=ExtResource("1_a4uyd")]
+script = ExtResource("2_rgq5t")
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer_NinePatchRect#CookButton" type="Button" parent="." index="0" unique_id=1228397355]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qqran")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_62juq")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ndbf7")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_o5xvh")
+disabled = true
+text = "Cook"
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer_HBoxContainer#StartingCookingSlot" parent="." index="1" unique_id=524107224 instance=ExtResource("2_jxcgn")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+script = ExtResource("3_i6ca2")
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer#NinePatchRect" type="NinePatchRect" parent="." index="2" unique_id=1092376540]
+visible = false
+custom_minimum_size = Vector2(196, 64)
+layout_mode = 0
+size_flags_horizontal = 4
+texture = ExtResource("4_e1bwi")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 64
+patch_margin_bottom = 32
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer_HBoxContainer#CookingProgressBar" type="TextureProgressBar" parent="." index="3" unique_id=1968739876]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(128, 48)
+layout_mode = 0
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.005
+nine_patch_stretch = true
+texture_under = ExtResource("3_l84wc")
+texture_progress = ExtResource("3_l84wc")
+tint_under = Color(0.313726, 0.223529, 0.133333, 1)
+tint_progress = Color(0.803922, 0.509804, 0, 1)
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer_HBoxContainer#FinalCookingSlot" parent="." index="4" unique_id=1877152338 instance=ExtResource("2_jxcgn")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+script = ExtResource("5_rvcl0")
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer_VBoxContainer#HBoxContainer" type="HBoxContainer" parent="." index="5" unique_id=969801500]
+visible = false
+layout_mode = 0
+theme_override_constants/separation = 32
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer_CenterContainer#VBoxContainer" type="VBoxContainer" parent="." index="6" unique_id=989423602]
+visible = false
+layout_mode = 0
+theme_override_constants/separation = 64
+
+[node name="MarginContainer_HBoxContainer_VBoxContainer_NinePatchRect_MarginContainer_VBoxContainer#CenterContainer" type="CenterContainer" parent="." index="8" unique_id=1523900009]
+layout_mode = 0
+size_flags_vertical = 3
+
+[node name="CloseButton" parent="." index="9"]
+anchors_preset = 1
+grow_vertical = 0

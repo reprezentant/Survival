@@ -1,0 +1,396 @@
+[gd_scene load_steps=13 format=3 uid="uid://ft2mnrxg3awc"]
+
+[ext_resource type="PackedScene" uid="uid://h6m2cttljfi8" path="res://bulletins/bulletin_template.tscn" id="1_0m8rg"]
+[ext_resource type="Script" path="res://bulletins/player_menus/player_menu_base.gd" id="2_5xscr"]
+[ext_resource type="Texture2D" uid="uid://tggb27oky30p" path="res://textures/panelInset_beige.png" id="2_lqv4p"]
+[ext_resource type="PackedScene" uid="uid://b7fx3qv0bkluk" path="res://ui/custom_nodes/inventory_slot.tscn" id="3_0fbb7"]
+[ext_resource type="Texture2D" uid="uid://dksddk1e3numc" path="res://textures/cross.png" id="3_2sb38"]
+[ext_resource type="Texture2D" uid="uid://b3lewqpquxqi4" path="res://textures/panelInset_brown.png" id="4_gva50"]
+[ext_resource type="Script" path="res://ui/custom_nodes/scrap_item_slot.gd" id="6_3cg4o"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wvdiu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vflo1"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_0kgb4"]
+device = -1
+keycode = 4194306
+
+[sub_resource type="InputEventKey" id="InputEventKey_n13rn"]
+device = -1
+keycode = 4194305
+
+[sub_resource type="Shortcut" id="Shortcut_dqk40"]
+events = [SubResource("InputEventKey_0kgb4"), SubResource("InputEventKey_n13rn")]
+
+[node name="PlayerMenuBase" instance=ExtResource("1_0m8rg")]
+mouse_filter = 2
+script = ExtResource("2_5xscr")
+
+[node name="MarginContainer" type="MarginContainer" parent="." index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 160
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" index="0"]
+layout_mode = 2
+
+[node name="WindowVBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer" index="0"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 0
+
+[node name="TabBar" type="HBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BackpackTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/TabBar" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Backpack"
+
+[node name="CraftingTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/TabBar" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Crafting"
+
+[node name="JournalTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/TabBar" index="2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Journal"
+
+[node name="ContentRect" type="NinePatchRect" parent="MarginContainer/HBoxContainer/WindowVBox" index="1"]
+custom_minimum_size = Vector2(784, 472)
+layout_mode = 2
+mouse_filter = 0
+texture = ExtResource("2_lqv4p")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 48
+patch_margin_bottom = 32
+
+[node name="BackpackPanel" type="Control" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect" index="0"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventorySlotContainer" type="GridContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 7
+
+[node name="InventorySlot" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="0" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot2" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="1" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot3" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="2" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot4" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="3" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot5" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="4" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot6" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="5" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot7" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="6" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot8" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="7" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot9" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="8" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot10" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="9" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot11" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="10" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot12" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="11" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot13" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="12" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot14" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="13" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot15" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="14" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot16" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="15" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot17" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="16" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot18" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="17" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot19" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="18" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot20" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="19" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot21" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="20" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot22" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="21" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot23" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="22" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot24" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="23" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot25" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="24" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot26" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="25" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot27" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="26" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="InventorySlot28" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/BackpackPanel/CenterContainer/InventorySlotContainer" index="27" instance=ExtResource("3_0fbb7")]
+layout_mode = 2
+
+[node name="CraftingPanel" type="Control" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect" index="1"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="JournalPanel" type="Control" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect" index="2"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="JournalPadding" type="MarginContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="JournalVBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CategoryTabs" type="HBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemsTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/CategoryTabs" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+focus_mode = 0
+text = "Items"
+
+[node name="CreaturesTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/CategoryTabs" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+focus_mode = 0
+text = "Creatures"
+
+[node name="ObjectsTabBtn" type="Button" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/CategoryTabs" index="2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+focus_mode = 0
+text = "Objects"
+
+[node name="JournalContent" type="ScrollContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox" index="1"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="JournalEntryContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/JournalContent" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="JournalInfoContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox" index="2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JournalInfoTitle" type="Label" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/JournalInfoContainer" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Select an entry to see details"
+
+[node name="JournalInfoDesc" type="Label" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/JournalPanel/JournalPadding/JournalVBox/JournalInfoContainer" index="1"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+autowrap_mode = 2
+
+[node name="CraftPadding" type="MarginContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/CraftingPanel" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="CraftAlignVBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/CraftingPanel/CraftPadding" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="CraftAlignHBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/CraftingPanel/CraftPadding/CraftAlignVBox" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="CraftButtonContainer" type="GridContainer" parent="MarginContainer/HBoxContainer/WindowVBox/ContentRect/CraftingPanel/CraftPadding/CraftAlignVBox/CraftAlignHBox" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 7
+
+[node name="InfoRect" type="NinePatchRect" parent="MarginContainer/HBoxContainer/WindowVBox" index="2"]
+custom_minimum_size = Vector2(784, 220)
+layout_mode = 2
+texture = ExtResource("2_lqv4p")
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 48
+patch_margin_bottom = 32
+
+[node name="InfoMargin" type="MarginContainer" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="InfoHBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ItemInfoLabel" type="Label" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin/InfoHBox" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+autowrap_mode = 2
+
+[node name="ExtraInfoLabel" type="Label" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin/InfoHBox" index="1"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 5
+autowrap_mode = 2
+
+[node name="ScrapSlot" type="TextureRect" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin/InfoHBox" index="2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 8
+texture = ExtResource("4_gva50")
+expand_mode = 1
+script = ExtResource("6_3cg4o")
+
+[node name="ScrapMargin" type="MarginContainer" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin/InfoHBox/ScrapSlot" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer/WindowVBox/InfoRect/InfoMargin/InfoHBox/ScrapSlot/ScrapMargin" index="0"]
+modulate = Color(0.815686, 0.25098, 0.137255, 1)
+layout_mode = 2
+texture = ExtResource("3_2sb38")
+expand_mode = 1
+
+[node name="CloseButton" type="Button" parent="." index="1"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -88.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 88.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_wvdiu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_vflo1")
+shortcut = SubResource("Shortcut_dqk40")
+icon = ExtResource("3_2sb38")
+icon_alignment = 1
+expand_icon = true
+
+[connection signal="pressed" from="CloseButton" to="." method="close"]
