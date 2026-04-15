@@ -7,7 +7,7 @@ extends Node3D
 func _ready() -> void:
 	for child in $MeshHolder.get_children():
 		if child is VisualInstance3D:
-			child.layers = 2 # equippable camera visual layer
+			child.layers = 1 # visible to main camera (TPP)
 
 
 func try_to_use() -> void:

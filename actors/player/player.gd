@@ -5,17 +5,24 @@ extends CharacterBody3D
 @export var sprint_speed := 5.0
 @export var walking_energy_consumption_per_1m := -0.05
 @export var jump_velocity := 4.0
-@export var gravity := 0.2
-@export var mouse_sensitivity := 0.005
+@export var gravity := 9.8
 @export var walking_footstep_audio_interval := 0.6
 @export var sprinting_footstep_audio_interval := 0.3
 
 @onready var head: Node3D = $Head
-@onready var interaction_ray_cast: RayCast3D = %InteractionRayCast
-@onready var item_holder = %ItemHolder
+var interaction_ray_cast: RayCast3D
+var item_holder: ItemHolder
 @onready var footstep_audio_timer: Timer = $FootstepAudioTimer
 
+# Third Person Camera references (read-only, camera is controlled by CameraTemplate.gd)
+var camera_h: Node3D
+var player_mesh: Node3D
+var animation_tree: AnimationTree
+var playback: AnimationNodeStateMachinePlayback
+var skeleton: Skeleton3D
+var hand_bone_idx: int = -1
 
+var direction = Vector3.BACK
 var is_grounded := true
 var is_sprinting := false
 
@@ -27,7 +34,33 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	init_camera_references()
 	EventSystem.HUD_show_hud.emit()
+
+
+func init_camera_references():
+	# Find camera_h for movement direction reference
+	var camera = find_child("Camera3D", true, false)
+	if camera:
+		var v_node = camera.get_parent()
+		if v_node and v_node.name == "v":
+			camera_h = v_node.get_parent()
+		interaction_ray_cast = camera.find_child("InteractionRayCast", true, false)
+	
+	# Find player mesh and animation
+	var player_template = get_node_or_null("PlayerTemplate")
+	if player_template:
+		player_mesh = player_template.get_node_or_null("mannequiny-0_4_0")
+		animation_tree = player_template.get_node_or_null("AnimationTree")
+		if animation_tree:
+			playback = animation_tree.get("parameters/playback")
+		# Find skeleton and hand bone for weapon tracking
+		if player_mesh:
+			skeleton = player_mesh.find_child("Skeleton3D", true, false)
+			if skeleton:
+				hand_bone_idx = skeleton.find_bone("hand.r")
+	
+	item_holder = get_node_or_null("ItemHolder")
 
 
 func _exit_tree() -> void:
@@ -41,18 +74,35 @@ func set_freeze(freeze:bool) -> void:
 
 
 func _process(_delta: float) -> void:
-	interaction_ray_cast.check_interaction()
+	if interaction_ray_cast != null:
+		interaction_ray_cast.check_interaction()
+	_update_item_holder()
+
+
+func _update_item_holder() -> void:
+	if skeleton == null or item_holder == null or hand_bone_idx < 0 or camera_h == null:
+		return
+	if item_holder.current_item_scene is EquippableConstructable:
+		# Place ItemHolder in front of player so ItemPlaceRay hits the ground ahead
+		item_holder.global_position = global_position + Vector3(0, 1.0, 0)
+		item_holder.rotation.y = camera_h.global_rotation.y
+		return
+	# Convert bone local-space pose to world position
+	var bone_pose := skeleton.get_bone_global_pose(hand_bone_idx)
+	item_holder.global_position = skeleton.to_global(bone_pose.origin)
+	# Orient toward where the camera (and player) is looking
+	item_holder.rotation.y = camera_h.global_rotation.y
 
 
 func _physics_process(delta: float) -> void:
-	move()
+	move(delta)
 	check_walking_consumption(delta)
 	
 	if Input.is_action_just_pressed("use_equipped_item"):
 		item_holder.try_to_use_item()
 
 
-func move():
+func move(delta: float):
 	if is_on_floor():
 		is_sprinting = Input.is_action_pressed("sprint")
 		
@@ -66,19 +116,37 @@ func move():
 		if not is_grounded:
 			is_grounded = true
 			EventSystem.SFX_play_dynamic_sfx.emit(SFXConfig.Keys.JumpLand, global_position)
-	
 	else:
 		velocity.y -= gravity
-		
 		if is_grounded:
 			is_grounded = false
 	
 	var speed := normal_speed if not is_sprinting else sprint_speed
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var is_moving := false
 	
-	velocity.z = direction.z * speed
-	velocity.x = direction.x * speed
+	# Movement direction relative to camera (same as original PlayerTemplate.gd)
+	var h_rot = 0.0
+	if camera_h != null and is_instance_valid(camera_h):
+		h_rot = camera_h.global_transform.basis.get_euler().y
+	
+	if (Input.is_action_pressed("move_forward") or Input.is_action_pressed("move_backward") or
+		Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right")):
+		direction = Vector3(
+			Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
+			0,
+			Input.get_action_strength("move_backward") - Input.get_action_strength("move_forward"))
+		direction = direction.rotated(Vector3.UP, h_rot).normalized()
+		is_moving = true
+	
+	# Rotate mesh to face movement direction
+	if player_mesh and is_moving:
+		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * 10)
+	
+	update_animations(is_moving)
+	
+	var horizontal_velocity = direction * speed if is_moving else Vector3.ZERO
+	velocity.z = horizontal_velocity.z
+	velocity.x = horizontal_velocity.x
 	
 	move_and_slide()
 
@@ -92,15 +160,14 @@ func check_walking_consumption(delta:float) -> void:
 		)
 
 
-func _input(event) -> void:
-	if event is InputEventMouseMotion:
-		look_around(event.relative)
-
-
-func look_around(relative:Vector2):
-	rotate_y(-relative.x * mouse_sensitivity)
-	head.rotate_x(-relative.y * mouse_sensitivity)
-	head.rotation.x = clampf(head.rotation.x, -PI/2, PI/2)
+func update_animations(is_moving: bool):
+	if animation_tree and playback:
+		animation_tree["parameters/conditions/IsOnFloor"] = is_on_floor()
+		animation_tree["parameters/conditions/IsInAir"] = not is_on_floor()
+		animation_tree["parameters/conditions/IsWalking"] = is_moving and not is_sprinting
+		animation_tree["parameters/conditions/IsNotWalking"] = not is_moving
+		animation_tree["parameters/conditions/IsRunning"] = is_moving and is_sprinting
+		animation_tree["parameters/conditions/IsNotRunning"] = not is_sprinting
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

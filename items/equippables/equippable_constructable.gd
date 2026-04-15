@@ -21,6 +21,8 @@ func _ready() -> void:
 	constructable_preview_mesh.mesh = $MeshHolder.get_child(0).mesh.duplicate()
 	constructable_area_collision_shape.shape = constructable_preview_mesh.mesh.create_convex_shape()
 	set_preview_material(INVALID_MATERIAL)
+	# Hide the viewmodel mesh — not needed in TPP, preview mesh is shown instead
+	$MeshHolder.hide()
 
 
 func set_preview_material(material:StandardMaterial3D) -> void:

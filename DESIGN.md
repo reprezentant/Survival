@@ -1,213 +1,4 @@
 # SURVIVE — Game Design Document
-> Godot 4.6 · Forward Plus · v0.x (in development)
-
----
-
-## Concept
-
-Survival na izolowanej wyspie. Gracz buduje tratwę i ucieka — to jest win condition. Gra jest **krótka i skoncentrowana**: jeden cel, określona ścieżka technologiczna, bez otwartej piaskownicy.
-
-**Pętla gry (core loop):**
-```
-Zbieraj surowce → Craftuj narzędzia → Odkrywaj nowe receptury → Zbuduj tratwę → Ucieknij
-```
-
-**Pillar design:**
-1. **Zagrożenie przez czas** — nie ma regeneracji energii, musisz jeść
-2. **Postęp technologiczny** — każde narzędzie odblokowuje kolejną warstwę craftingu
-3. **Ryzyko vs nagroda** — wilki są groźne, ale dają mięso; grzyby regenerują energię kosztem zdrowia
-
----
-
-## Stan projektu — co jest ZROBIONE
-
-### Rdzeń gracza
-- [x] Ruch (WASD + sprint + skok), kamera z szumem (ShakingCamera)
-- [x] **Energia** — spada podczas chodzenia (`0.05 × velocity/frame`) i używania broni (`-0.5/użycie`)
-- [x] **Zdrowie** — odbiera je wilk (domyślnie -20), grzyb (-10), brak energii (przelew do HP)
-- [x] Footstep audio (0.6s chód / 0.3s sprint, 3D pozycyjne, pitch randomizacja)
-- [x] HUD: paski HP/Energy, hotbar 9 slotów
-
-### Ekwipunek i przedmioty (18 typów)
-- [x] Inwentarz 28 slotów + hotbar 9 slotów
-- [x] Stackowanie (max 50), drag-and-drop między wszystkimi slotami
-- [x] **Dzielenie stosów** — menu kontekstowe PPM do dzielenia stacków
-- [x] **System ostrzeżeń przy wyrzucaniu** — rozróżnienie przedmiotów które znikają na zawsze vs odzyskiwalne
-- [x] **Potwierdzenia wyrzucania** — popup dla cennych przedmiotów z jasną informacją o konsekwencjach
-- [x] Zapis/odczyt inwentarza (`user://inventory.json`)
-- [x] 3 typy zasobów przedmiotów: `ItemResource`, `WeaponItemResource`, `ConsumableItemResource`
-
-| Surowce          | Narzędzia         | Konstrukty   |
-|------------------|-------------------|--------------|
-| Stick, Stone, Plant | Axe, Pickaxe   | Campfire     |
-| Mushroom, Fruit  | Multitool, Tinderbox | Torch    |
-| Log, Coal, Flintstone | Rope        | Tent, Raft   |
-| RawMeat, CookedMeat   |             |              |
-
-### Crafting
-- [x] Menu craftingowe (Tab), 9 blueprintów
-- [x] System prerequisytów (Multitool / Tinderbox gatują wyższe receptury)
-- [x] Blokada craftingu jeśli brakuje surowców
-
-**Drzewo technologiczne:**
-```
-Rope (Plant×2)
-  └─ Axe (Stick+Stone+Rope)
-  └─ Pickaxe (Stick+Stone+Rope)
-  └─ Multitool (Stick+Stone+Flintstone+Coal+RawMeat) ──── prerequisyt
-	   └─ Tinderbox (Stick×2+Stone+Flintstone+Coal) ──── prerequisyt
-			└─ Campfire (Stick×3+Stone×10)
-			└─ Torch (Stick+Rope×2)
-			└─ Raft (Stick×6+Rope×4+Plant×6+Log×6+CookedMeat×2) ← WIN
-  └─ Tent (Stick×5+Rope×4+Plant×6)
-```
-
-### Gotowanie — System Wsadowy 🍳 (ULEPSZONE)
-- [x] Kuchenka (Campfire) — interakcja otwiera CookingMenu
-- [x] **Gotowanie wsadowe** — możliwość gotowania wielu przedmiotów naraz
-- [x] **Licznik czasu** — wizualny pasek postępu + countdown timer (mm:ss)
-- [x] **Persistent state** — stan gotowania zachowany po zamknięciu menu
-- [x] **Smart inventory** — gotowe przedmioty przechowywane w slocie
-- [x] **Popup wyboru ilości** — dialog do wybierania ile przedmiotów ugotować
-- [x] **Inteligentne zarządzanie stanem** — brak automatycznego umieszczania przedmiotów
-- [x] **Scena świata dla ugotowanego mięsa** — prawidłowe wyrzucanie na ziemię
-- [x] Receptura: RawMeat → CookedMeat (5 sek każde)
-
-### Walka i hittable objects
-- [x] Raycast hit na warstwie 8 (hitbox), zakres z `attack_range`
-- [x] **Siekiera** niszczy drzewa (tylko siekierą!) → Log
-- [x] **Kilof** niszczy głazy węglowe / flintstoneowe (tylko kilofem!) → Coal/Flintstone
-- [x] **System rąbania logów** — log na ziemi + siekiera = 3 patyki (log znika)
-- [x] VFX przy trafieniu (particles drewno/kamień/krew)
-- [x] Resztki po zniszczeniu (pniak po drzewie)
-
-### Zwierzęta
-- [x] **Krowa** — ucieka gdy zaatakowana lub zobaczy gracza (is_aggressive=false)
-- [x] **Wilk** — full AI: widzi gracza (stożek 80°, LOS raycast) → goni → atakuje → śmierć → spawnuje RawMeat
-- [x] NavigationAgent3D, rebake navmesh po postawieniu budowli
-
-### Konstrukty
-- [x] Podgląd placement (zielony/czerwony overlay), detekcja kolizji
-- [x] Campfire → działa od razu (fire_always_on=true)
-- [x] Tent → InteractableSleepPoint → sen, przesuwa czas o 8 jednostek
-- [x] Raft → InteractableRaft → **win condition** → Credits stage
-
-### Świat i systemy
-- [x] Dzień/noc (AnimationPlayer, możliwy fast-forward przez sen)
-- [x] 3 sceny: MainMenu, Island, Credits
-- [x] Threaded stage loading + czarny fade
-- [x] Ustawienia (głośność muzyki/sfx, res scale, SSAA, fullscreen) z zapisem
-- [x] Migoczące ognie (FlickeringLight — FastNoise, działa w edytorze)
-- [x] Pause menu (ESC)
-- [x] EventSystem — centralny singleton, 59 sygnałów, zero bezpośrednich referencji między managerami
-
----
-
-## Architektura — zasady systemu
-
-### EventSystem jako szyna danych
-Wszystko komunikuje się przez `EventSystem` (Autoload). Żaden manager nie trzyma referencji do innego managera. Hierarchia systemu:
-
-```
-EventSystem (Autoload)
-├── PlayerStatsManager
-├── InventoryManager
-├── EquippedItemManager
-├── JournalManager 📚 (NOWY)
-├── BulletinController
-├── HUDController
-├── Spawner
-├── MusicController
-├── SFXController
-├── SettingsController
-├── SleepManager
-└── DayNightCycleAnimPlayer
-```
-
-**Reguła:** Jeśli musisz wywołać metodę w innym managerze — użyj sygnału.
-
-### Prefiks sygnałów (konwencja)
-| Prefiks | Podsystem |
-|---------|-----------|
-| `BUL_` | Bulletin/UI overlay |
-| `STA_` | Stage management |
-| `INV_` | Inventory |
-| `PLA_` | Player |
-| `EQU_` | Equipped item |
-| `SPA_` | Spawner |
-| `SFX_` | Sound effects |
-| `MUS_` | Music |
-| `GAM_` | Game-level (fade, navmesh, etc.) |
-| `HUD_` | HUD visibility |
-| `SET_` | Settings |
-| **`JOU_`** | **Journal** 📚 (NOWY) |
-
----
-
-## NOWE FUNKCJE — aktualizacja v1.0
-
-### 🏆 **Wszystkie planowane funkcje zostały zaimplementowane:**
-
-#### 1. **System Journal** 📚
-- Automatyczne odkrywanie przedmiotów i zwierząt
-- Kategoryzacja: Items, Objects, Creatures
-- Wykrzykniki dla nowych wpisów
-- Klawiatura: J key
-
-#### 2. **Gotowanie Wsadowe** 🍳
-- Batch cooking wielu przedmiotów
-- Countdown timer z mm:ss formatem
-- Persistent state między sesjami
-- Smart progress tracking
-
-#### 3. **Ochrona Dropowania** 🛡️
-- Confirmation popup dla wartościowych przedmiotów
-- Chronione: Axe, Pickaxe, Torch, Rope, Campfire, Raft, Tent, Multitool, Tinderbox
-- Zapobiega przypadkowej utracie skraftowanych narzędzi
-
-#### 4. **System Rąbania Logów** 🪓
-- Log + Axe = 3 Sticks
-- Log znika po rozrąbaniu
-- Realistic resource processing
-
----
-
-## Status ukończenia (100% GOTOWE)
-
-### ✅ **Core Gameplay** — Kompletne
-- Survival mechanics (HP/Energy)
-- Tool progression system  
-- Resource gathering & crafting
-- Win condition (Raft escape)
-
-### ✅ **UI/UX** — Kompletne
-- Journal dla exploration
-- Inventory management
-- Cooking interface z progress
-- Drop confirmation system
-
-### ✅ **Quality of Life** — Kompletne  
-- Persistent save system
-- Visual feedback systems
-- Sound design integration
-- Settings persistence
-
----
-
-## Znane długi techniczne (niski priorytet)
-
-### Nieistotne ograniczenia
-- [ ] Zapis tylko inwentarza (mapa resetuje się co run) — **zamierzone dla replay value**
-- [ ] Torch nie ma light source — **mechanika do rozbudowy**
-- [ ] Niektóre narzędzia nie scrappable — **zapobiega exploitom**
-
-### Design intent (nie bugs)
-- Brak regeneracji energii → zmusza do planowania jedzenia
-- Reset mapy po restart → każdy run to fresh start
-- Weapon filtering enforced → realistyczne użycie narzędzi
-
-**Gra jest gotowa do release! 🚀**
-# SURVIVE — Game Design Document
 > Godot 4.6 · Forward Plus · v1.0 (Feature Complete)
 
 ---
@@ -401,9 +192,24 @@ END
 | `actors/player/player.gd` | Ruch, wejście gracza |
 | `actors/animals/animal.gd` | AI zwierząt (state machine) |
 | `objects/hittable_objects/hittable_object.gd` | Drzewa, głazy |
-| `items/equippables/equippable_weapon.gd` | Raycast trafień |
+| `items/equippables/equippable_weapon.gd` | RayCast trafień |
 | `items/equippables/equippable_constructable.gd` | System budowania |
 | `bulletins/player_menus/crafting_menu/crafting_menu.gd` | UI craftingu |
 | `bulletins/player_menus/cooking_menu/cooking_menu.gd` | UI gotowania |
 | `resources/crafting_blueprints/` | Przepisy craftu (.tres) |
 | `resources/items/` | Zasoby przedmiotów (.tres) |
+
+---
+
+## 🆕 **Changelog v1.0 — Feature Complete**
+- Naprawiono system podnoszenia przedmiotów: dodano brakujący RayCast3D (`InteractionRayCast`) do gracza, ustawiono `target_position = Vector3(0, 0, -8)`, `collide_with_areas = true`, `collision_mask = 4`.
+- System interakcji działa na warstwie 3 (interactable), RayCast jest dzieckiem kamery trzecioosobowej.
+- Pickupy i interakcje są w pełni event-driven (sygnały Godot, brak bezpośrednich referencji między managerami).
+- Status projektu: **100% ukończony** — wszystkie planowane funkcje zaimplementowane.
+
+## ⚡ **System podnoszenia przedmiotów**
+- Gracz podnosi przedmioty przez RayCast3D (`InteractionRayCast`) wychodzący z kamery trzecioosobowej.
+- RayCast wykrywa tylko obiekty na warstwie 3 (`collision_mask = 4`), czyli wszystkie pickuppable/interactable.
+- Zasięg interakcji: 8 metrów (dostosowane do dystansu kamery).
+- Interakcja wywołuje sygnał do EventSystem, który obsługuje pickup, inventory i usuwanie obiektu ze sceny.
+- Prompt pojawia się tylko, gdy RayCast trafia w Area3D z metodą `start_interaction()`.

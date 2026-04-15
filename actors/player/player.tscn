@@ -1,76 +1,55 @@
-[gd_scene load_steps=10 format=3 uid="uid://bb4ajqrspiuc8"]
+[gd_scene format=3 uid="uid://bb4ajqrspiuc8"]
 
-[ext_resource type="Script" path="res://actors/player/player.gd" id="1_u4shn"]
-[ext_resource type="Script" path="res://actors/player/interaction_ray_cast.gd" id="2_3wla4"]
-[ext_resource type="Script" path="res://actors/player/main_camera.gd" id="2_ofptj"]
-[ext_resource type="Script" path="res://actors/player/item_holder.gd" id="3_a5bbk"]
-[ext_resource type="Script" path="res://game/managers/inventory_manager.gd" id="3_qnmcm"]
-[ext_resource type="Script" path="res://game/managers/equipped_item_manager.gd" id="4_tgk6a"]
-[ext_resource type="Script" path="res://game/managers/player_stats_manager.gd" id="7_2amrl"]
-[ext_resource type="Script" path="res://game/managers/sleep_manager.gd" id="8_u11tx"]
+[ext_resource type="Script" uid="uid://ltjx8x13fn4t" path="res://actors/player/player.gd" id="1_u4shn"]
+[ext_resource type="PackedScene" uid="uid://c75s2m6eic1vo" path="res://addons/ThirdPersonTemplate/Character/Nodes/PlayerTemplate.tscn" id="2_a744p"]
+[ext_resource type="Script" uid="uid://bl4tfwdihfc7e" path="res://game/managers/inventory_manager.gd" id="3_qnmcm"]
+[ext_resource type="Script" uid="uid://ccfp274law52h" path="res://actors/player/item_holder.gd" id="4_ih"]
+[ext_resource type="Script" uid="uid://llhu16xwv2g5" path="res://game/managers/equipped_item_manager.gd" id="4_tgk6a"]
+[ext_resource type="Script" uid="uid://bgks2ftweb50e" path="res://game/managers/player_stats_manager.gd" id="7_2amrl"]
+[ext_resource type="Script" uid="uid://cvotv2pyre5af" path="res://game/managers/sleep_manager.gd" id="8_u11tx"]
+[ext_resource type="Script" uid="uid://dfrowsw7ex5w1" path="res://actors/player/interaction_ray_cast.gd" id="9_irc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1tkb2"]
 radius = 0.25
 height = 1.8
 
-[node name="Player" type="CharacterBody3D" groups=["Player"]]
+[node name="Player" type="CharacterBody3D" unique_id=414318440 groups=["Player"]]
 collision_layer = 2
 collision_mask = 81
 script = ExtResource("1_u4shn")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=759231818]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_1tkb2")
 
-[node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.649716, 0)
+[node name="PlayerTemplate" parent="." unique_id=1655273119 instance=ExtResource("2_a744p")]
 
-[node name="MainCamera" type="Camera3D" parent="Head"]
-cull_mask = 1048573
-script = ExtResource("2_ofptj")
+[node name="Head" type="Node3D" parent="." unique_id=2088776541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 
-[node name="InteractionRayCast" type="RayCast3D" parent="Head"]
-unique_name_in_owner = true
-target_position = Vector3(0, 0, -2)
-collision_mask = 4
-collide_with_areas = true
-script = ExtResource("2_3wla4")
+[node name="ItemHolder" type="Node3D" parent="." unique_id=242511625]
+script = ExtResource("4_ih")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="Head"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-stretch = true
+[node name="Managers" type="Node" parent="." unique_id=1802579502]
 
-[node name="SubViewport" type="SubViewport" parent="Head/SubViewportContainer"]
-transparent_bg = true
-handle_input_locally = false
-gui_disable_input = true
-size = Vector2i(1920, 1080)
-render_target_update_mode = 4
-
-[node name="EquippableCamera" type="Camera3D" parent="Head/SubViewportContainer/SubViewport"]
-unique_name_in_owner = true
-cull_mask = 2
-
-[node name="ItemHolder" type="Node3D" parent="Head/SubViewportContainer/SubViewport/EquippableCamera"]
-unique_name_in_owner = true
-script = ExtResource("3_a5bbk")
-
-[node name="Managers" type="Node" parent="."]
-
-[node name="InventoryManager" type="Node" parent="Managers"]
+[node name="InventoryManager" type="Node" parent="Managers" unique_id=1932938813]
 script = ExtResource("3_qnmcm")
 
-[node name="EquippedItemManager" type="Node" parent="Managers"]
+[node name="EquippedItemManager" type="Node" parent="Managers" unique_id=2074719599]
 script = ExtResource("4_tgk6a")
 
-[node name="PlayerStatsManager" type="Node" parent="Managers"]
+[node name="PlayerStatsManager" type="Node" parent="Managers" unique_id=63051832]
 script = ExtResource("7_2amrl")
 
-[node name="SleepManager" type="Node" parent="Managers"]
+[node name="SleepManager" type="Node" parent="Managers" unique_id=176076123]
 script = ExtResource("8_u11tx")
 
-[node name="FootstepAudioTimer" type="Timer" parent="."]
+[node name="InteractionRayCast" type="RayCast3D" parent="PlayerTemplate/Camroot/h/v/Camera3D"]
+target_position = Vector3(0, 0, -8)
+collision_mask = 4
+collide_with_areas = true
+collide_with_bodies = false
+script = ExtResource("9_irc")
+
+[node name="FootstepAudioTimer" type="Timer" parent="." unique_id=2134032383]
 one_shot = true

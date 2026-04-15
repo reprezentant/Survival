@@ -147,4 +147,19 @@ ui/            # Custom UI components
 
 ---
 
+## 🆕 **Ostatnie zmiany (v1.0)**
+- Naprawiono system podnoszenia przedmiotów: dodano brakujący RayCast3D (`InteractionRayCast`) do gracza, ustawiono `target_position = Vector3(0, 0, -8)`, `collide_with_areas = true`, `collision_mask = 4`.
+- System interakcji działa na warstwie 3 (interactable), RayCast jest dzieckiem kamery trzecioosobowej.
+- Cała architektura pickupów jest event-driven (sygnały Godot, brak bezpośrednich referencji).
+- Status projektu: **Feature Complete** (wszystkie planowane funkcje zaimplementowane).
+
+## ⚡ **System podnoszenia przedmiotów**
+- Gracz podnosi przedmioty przez RayCast3D (`InteractionRayCast`) wychodzący z kamery trzecioosobowej.
+- RayCast wykrywa tylko obiekty na warstwie 3 (`collision_mask = 4`), czyli wszystkie pickuppable/interactable.
+- Zasięg interakcji: 8 metrów (dostosowane do dystansu kamery).
+- Interakcja wywołuje sygnał do EventSystem, który obsługuje pickup, inventory i usuwanie obiektu ze sceny.
+- Prompt pojawia się tylko, gdy RayCast trafia w Area3D z metodą `start_interaction()`.
+
+---
+
 **Created with ❤️ in Godot 4.6 by [Your Name]**

@@ -61,5 +61,11 @@ git push
 - **Engine**: Godot 4.6
 - **Typ**: Survival game
 
+## 🆕 **Changelog v1.0**
+- Naprawiono system podnoszenia przedmiotów: dodano brakujący RayCast3D (`InteractionRayCast`) do gracza, ustawiono `target_position = Vector3(0, 0, -8)`, `collide_with_areas = true`, `collision_mask = 4`.
+- System interakcji działa na warstwie 3 (interactable), RayCast jest dzieckiem kamery trzecioosobowej.
+- Pickupy i interakcje są w pełni event-driven (sygnały Godot, brak bezpośrednich referencji między managerami).
+- Status projektu: **Feature Complete** (wszystkie planowane funkcje zaimplementowane).
+
 ---
 *Repository utworzone automatycznie przez Copilot*

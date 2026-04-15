@@ -23,7 +23,10 @@ func check_hit() -> void:
 	ray_query_params.collide_with_bodies = false
 	ray_query_params.collision_mask = 8 # hitbox physics layer
 	ray_query_params.from = global_position
-	ray_query_params.to = hit_check_marker.global_position
+	# Sweep toward hit marker and down to ground level to catch objects on the floor
+	var target := hit_check_marker.global_position
+	target.y = minf(target.y, global_position.y - 1.2)
+	ray_query_params.to = target
 	
 	var result := space_state.intersect_ray(ray_query_params)
 	
