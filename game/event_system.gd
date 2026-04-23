@@ -67,6 +67,8 @@ signal JOU_discover
 signal JOU_test
 signal JOU_entry_read
 
+signal UI_show_pickup_notification
+
 
 func connect_once(signal_name: String, target: Callable) -> void:
 	# Callable should be a Callable(self, "method_name") or a bound Callable.

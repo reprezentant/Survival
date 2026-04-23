@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://j2ye5q4ugk5f"]
+
+[ext_resource type="Script" uid="uid://d0gg2likpldkj" path="res://ui/hud/pickup_notification_panel.gd" id="1_panel_gd"]
+
+[node name="PickupNotificationPanel" type="Panel" unique_id=880827797]
+custom_minimum_size = Vector2(420, 96)
+anchors_preset = -1
+anchor_left = 0.67600006
+anchor_top = 0.785
+anchor_right = 0.9760001
+anchor_bottom = 0.88500005
+offset_left = 0.079833984
+offset_top = 0.19995117
+offset_right = 0.079833984
+offset_bottom = 0.19995117
+script = ExtResource("1_panel_gd")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=91288455]
+custom_minimum_size = Vector2(420, 96)
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_right = 24.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer" unique_id=123475541]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.3
+expand_mode = 3
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1983975130]
+custom_minimum_size = Vector2(200, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Zebrałeś: Przedmiot"
+vertical_alignment = 1

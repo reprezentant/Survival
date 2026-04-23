@@ -250,6 +250,8 @@ func add_item(item_key:ItemConfig.Keys, amount:int = 1) -> int:
 		EventSystem.INV_inventory_updated.emit(inventory)
 		var added := amount - remaining
 		EventSystem.INV_add_item_ack.emit(added, remaining)
+		if added > 0:
+			EventSystem.UI_show_pickup_notification.emit(item_key, added)
 		return remaining
 
 	# Non-stackable: need one slot per unit
@@ -263,6 +265,8 @@ func add_item(item_key:ItemConfig.Keys, amount:int = 1) -> int:
 	EventSystem.INV_inventory_updated.emit(inventory)
 	var added2 := amount - remaining
 	EventSystem.INV_add_item_ack.emit(added2, remaining)
+	if added2 > 0:
+		EventSystem.UI_show_pickup_notification.emit(item_key, added2)
 	return remaining
 
 

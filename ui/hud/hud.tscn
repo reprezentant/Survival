@@ -106,3 +106,4 @@ texture_under = ExtResource("4_iu14x")
 texture_progress = ExtResource("4_iu14x")
 tint_under = Color(0.203922, 0.203922, 0.203922, 1)
 tint_progress = Color(1, 0.760784, 0.360784, 1)
+

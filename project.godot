@@ -26,6 +26,7 @@ buses/default_bus_layout="uid://b8g5agn11ccjo"
 [autoload]
 
 EventSystem="*res://game/event_system.gd"
+PickupNotificationManager="*uid://dby4c0xqt528w"
 
 [display]
 

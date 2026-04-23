@@ -8,7 +8,8 @@
 [ext_resource type="Script" uid="uid://lkpyhpkpxr31" path="res://game/managers/settings_controller.gd" id="8_nux32"]
 [ext_resource type="Script" uid="uid://kuvd3isa3umt" path="res://game/managers/bulletin_controller.gd" id="9_g8ktk"]
 [ext_resource type="PackedScene" uid="uid://cpa1jv2ke0s03" path="res://ui/hud/hud.tscn" id="9_x41ec"]
-[ext_resource type="Script" path="res://game/managers/journal_manager.gd" id="10_journal"]
+[ext_resource type="Script" uid="uid://ds0jf8votepw4" path="res://game/managers/journal_manager.gd" id="10_journal"]
+[ext_resource type="PackedScene" uid="uid://cscfddknt7tyr" path="res://ui/hud/pickup_notification_manager.tscn" id="11_pickupnotif"]
 
 [sub_resource type="Animation" id="Animation_jjo07"]
 length = 0.001
@@ -119,3 +120,5 @@ libraries/ = SubResource("AnimationLibrary_wisqy")
 
 [node name="SettingsController" type="Node" parent="." unique_id=1269789417]
 script = ExtResource("8_nux32")
+
+[node name="PickupNotificationManager" parent="." unique_id=902723161 instance=ExtResource("11_pickupnotif")]

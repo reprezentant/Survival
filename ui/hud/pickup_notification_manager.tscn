@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cscfddknt7tyr"]
+
+[ext_resource type="Script" uid="uid://dby4c0xqt528w" path="res://ui/hud/pickup_notification_manager.gd" id="1_mgr"]
+
+[node name="PickupNotificationManager" type="CanvasLayer" unique_id=1691095527]
+layer = 10
+script = ExtResource("1_mgr")
